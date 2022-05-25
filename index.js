@@ -13,6 +13,11 @@ module.exports = (app) => {
     return context.octokit.issues.createComment(issueComment);
   });
 
+  app.on("issues.opened", async (context) => {
+    const newLabels = context.issue({labels:["new"]});
+    return context.octokit.issues.addLabels(newLabels);
+  })
+
   // For more information on building apps:
   // https://probot.github.io/docs/
 
