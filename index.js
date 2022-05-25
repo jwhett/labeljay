@@ -16,7 +16,15 @@ module.exports = (app) => {
   app.on("issues.opened", async (context) => {
     const newLabels = context.issue({labels:["new"]});
     return context.octokit.issues.addLabels(newLabels);
-  })
+  });
+
+  app.on("issue_comment.created", async (context) => {
+    if (context.isBot) return;
+    const ourComment = context.issue({
+      body: "Hey! :wave:"
+    });
+    return context.octokit.issues.createComment(ourComment);
+  });
 
   // For more information on building apps:
   // https://probot.github.io/docs/
