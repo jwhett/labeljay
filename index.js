@@ -30,6 +30,8 @@ module.exports = (app) => {
   app.on("issue_comment.created", async (context) => {
     if (context.isBot) return; // ignore the bots
     app.log.info("New comment. Deciding which labels to apply!")
+    currentLabels = await context.octokit.issues.listLabelsOnIssue(context.issue());
+    app.log.info("Current issue labels: " + currentLabels);
     let waitingOn;
     if (context.payload.comment.author_association === "OWNER") {
       waitingOn = context.issue({
