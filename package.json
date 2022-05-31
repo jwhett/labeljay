@@ -1,6 +1,6 @@
 {
   "name": "labeljay",
-  "version": "2.0.0",
+  "version": "3.2.0",
   "private": true,
   "description": "A label management bot based on Probot",
   "author": "Josh Whetton <whetton.josh@gmail.com>",
