@@ -1,0 +1,8 @@
+---
+messages:
+  welcome: Hello! Thanks for submitting an issue.
+  onComment: ":wave: Hey!"
+labels:
+  new: new
+  waitingOnUser: Waiting on user feedback
+  waitingOnYou: Waiting on support

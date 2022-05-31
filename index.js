@@ -3,12 +3,13 @@
  * @param {import('probot').Probot} app
  */
 
-const config = require("./config.json");
+const botConfig = 'label-config.yml'
 
 module.exports = (app) => {
   app.log.info("Loaded!");
 
   app.on("issues.opened", async (context) => {
+    const config = await context.config(botConfig);
     app.log.debug("New issue!");
 
     const issueComment = context.issue({
@@ -23,6 +24,7 @@ module.exports = (app) => {
   });
 
   app.on("issue_comment.created", async (context) => {
+    const config = await context.config(botConfig);
     if (context.isBot) return; // ignore the bots
     app.log.debug("New comment. Deciding which labels to apply...");
 
