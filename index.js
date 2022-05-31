@@ -9,40 +9,64 @@ module.exports = (app) => {
   app.log.info("Loaded!");
 
   app.on("issues.opened", async (context) => {
-    app.log.info("New issue. Posting first comment!");
+    app.log.debug("New issue!");
+
     const issueComment = context.issue({
       body: config.messages.welcome,
     });
-    return context.octokit.issues.createComment(issueComment);
-  });
+    await context.octokit.issues.createComment(issueComment);
 
-  app.on("issues.opened", async (context) => {
-    app.log.info("New issue. Adding labels!");
     const newLabels = context.issue({
-      labels:[
-        config.labels.new,
-        config.labels.waitingOnYou
-      ]
+      labels: [config.labels.new, config.labels.waitingOnYou],
     });
     return context.octokit.issues.addLabels(newLabels);
   });
 
   app.on("issue_comment.created", async (context) => {
     if (context.isBot) return; // ignore the bots
-    app.log.info("New comment. Deciding which labels to apply!")
-    currentLabels = await context.octokit.issues.listLabelsOnIssue(context.issue());
-    app.log.info("Current issue labels: " + currentLabels);
+    app.log.debug("New comment. Deciding which labels to apply...");
+
+    let issueLabels = context.payload.issue.labels.map((label) => label.name);
+    app.log.debug(`Current issue labels: ${issueLabels}`);
+
     let waitingOn;
+    let toBeRemoved;
+    let removeNew;
     if (context.payload.comment.author_association === "OWNER") {
-      waitingOn = context.issue({
-        labels:[config.labels.waitingOnUser],
-      });
+      waitingOn = config.labels.waitingOnUser;
+      toBeRemoved = config.labels.waitingOnYou;
+      removeNew = true;
     } else {
-      waitingOn = context.issue({
-        labels:[config.labels.waitingOnYou],
-      })
+      waitingOn = config.labels.waitingOnYou;
+      toBeRemoved = config.labels.waitingOnUser;
     }
-    // completely overwrite labels for now...
-    return context.octokit.issues.setLabels(waitingOn);
+
+    // remove the old label if it exists
+    if (issueLabels.includes(toBeRemoved)) {
+      app.log.debug(`Found label to remove: ${toBeRemoved}`);
+      delete issueLabels[issueLabels.indexOf(toBeRemoved)];
+    }
+
+    // make sure we remove the "new" label when it's
+    // no longer needed.
+    if (removeNew && issueLabels.includes(config.labels.new)) {
+      app.log.debug("This issue isn't 'new' anymore...");
+      delete issueLabels[issueLabels.indexOf(config.labels.new)];
+    }
+
+    // add the new label
+    issueLabels.push(waitingOn);
+
+    // clean the array
+    app.log.debug(`before clean: ${issueLabels}`);
+    issueLabels = issueLabels.filter((label) => {
+      return label !== null;
+    });
+    app.log.debug(`after clean: ${issueLabels}`);
+
+    // update issue labels
+    return context.octokit.issues.setLabels(
+      context.issue({ labels: issueLabels })
+    );
   });
 };
