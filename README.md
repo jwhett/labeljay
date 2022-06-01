@@ -12,6 +12,10 @@ npm install
 npm start
 ```
 
+## Configuration
+
+Configuration of the bot is achieved by creating `.github/label-config.yml` in the repo where labeljay is installed. An example configuration is provided [here](./example-label-config.yml).
+
 ## Docker
 
 ```sh

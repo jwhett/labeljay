@@ -1,9 +1,0 @@
-{
-    "messages": {
-        "welcome": "Hello! Thanks for submitting an issue.",
-        "onComment": ":wave: Hey!"
-    },
-    "labels": {
-        "new": "new"
-    }
-}
