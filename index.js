@@ -11,6 +11,11 @@ module.exports = (app) => {
 
   app.on("issues.opened", async (context) => {
     const config = await context.config(botConfig);
+    if (!config) {
+      let info = context.repo();
+      app.log.info(`Could not fetch config for ${info.owner}/${info.repo}`);
+      return
+    }
     app.log.debug("New issue!");
 
     const issueComment = context.issue({
@@ -25,8 +30,13 @@ module.exports = (app) => {
   });
 
   app.on("issue_comment.created", async (context) => {
-    const config = await context.config(botConfig);
     if (context.isBot) return; // ignore the bots
+    const config = await context.config(botConfig);
+    if (!config) {
+      let info = context.repo();
+      app.log.info(`Could not fetch config for ${info.owner}/${info.repo}`);
+      return
+    }
     app.log.debug("New comment. Deciding which labels to apply...");
 
     let issueLabels = context.payload.issue.labels.map((label) => label.name);
